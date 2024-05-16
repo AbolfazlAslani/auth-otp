@@ -1,6 +1,7 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { otpEntity } from "./otp.entity";
 
-@Entity()
+@Entity("user")
 export class UserEntity {
     @PrimaryGeneratedColumn("increment")
     id: number;
@@ -22,5 +23,13 @@ export class UserEntity {
     
     @UpdateDateColumn()
     updatedAt : Date;
+    
+    @Column()
+    otpId : number;
+    
+    
+    @OneToOne(() => otpEntity, (otp) => otp.user)
+    @JoinColumn({name:"otpId"})
+    otp : otpEntity;
 
 }
