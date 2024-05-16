@@ -1,10 +1,10 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserEntity } from '../user/entities/user.entity';
 import { Code, Repository } from 'typeorm';
 import { otpEntity } from '../user/entities/otp.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomInt } from 'crypto';
-import { SendOtpDto } from './dto/auth.dto';
+import { CheckOtpDto, SendOtpDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService { 
@@ -15,6 +15,37 @@ export class AuthService {
       @InjectRepository(otpEntity) private otpRepository : Repository<otpEntity>   
 
     ){}
+    
+    async checkOtp(otpDto: CheckOtpDto){
+        const {mobile, code} = otpDto;
+        const now = new Date();
+        const user = await this.userRepository.findOne({
+        
+        where : {mobile},
+        relations : {
+            otp: true
+        }
+        
+        });
+        if (!user || !user?.otp) throw new UnauthorizedException("Account Not Found!");
+        const otp = user?.otp 
+        if (otp?.code !== code) throw new UnauthorizedException("Code is incorrect");
+        if (otp.expires_in < now) throw new UnauthorizedException("otp code is expired")
+        if(!user.mobile_verify){
+            await this.userRepository.update(
+                {id:user.id},
+                {
+                    mobile_verify:true
+                }
+            )
+        
+        }
+        
+        return {
+            message:"You Logged in Successfully!"
+        }    
+
+    }
     
     
     async sendOtp(otpDto : SendOtpDto){

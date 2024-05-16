@@ -23,7 +23,9 @@ let AuthController = class AuthController {
     sendOtp(otpDto) {
         return this.authService.sendOtp(otpDto);
     }
-    checkOtp() { }
+    checkOtp(checkOtpDto) {
+        return this.authService.checkOtp(checkOtpDto);
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -35,8 +37,9 @@ __decorate([
 ], AuthController.prototype, "sendOtp", null);
 __decorate([
     (0, common_1.Post)('check-otp'),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [auth_dto_1.CheckOtpDto]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "checkOtp", null);
 exports.AuthController = AuthController = __decorate([

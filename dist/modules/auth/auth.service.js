@@ -24,6 +24,31 @@ let AuthService = class AuthService {
         this.userRepository = userRepository;
         this.otpRepository = otpRepository;
     }
+    async checkOtp(otpDto) {
+        const { mobile, code } = otpDto;
+        const now = new Date();
+        const user = await this.userRepository.findOne({
+            where: { mobile },
+            relations: {
+                otp: true
+            }
+        });
+        if (!user || !user?.otp)
+            throw new common_1.UnauthorizedException("Account Not Found!");
+        const otp = user?.otp;
+        if (otp?.code !== code)
+            throw new common_1.UnauthorizedException("Code is incorrect");
+        if (otp.expires_in < now)
+            throw new common_1.UnauthorizedException("otp code is expired");
+        if (!user.mobile_verify) {
+            await this.userRepository.update({ id: user.id }, {
+                mobile_verify: true
+            });
+        }
+        return {
+            message: "You Logged in Successfully!"
+        };
+    }
     async sendOtp(otpDto) {
         const { mobile } = otpDto;
         let user = await this.userRepository.findOneBy({ mobile });
