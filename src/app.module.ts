@@ -1,10 +1,18 @@
 import { Module } from '@nestjs/common';
 import { CustomConfigModule } from './modules/config/configs.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmConfig } from './config/typeorm.config';
 
 
 @Module({
-  imports: [CustomConfigModule],
+  imports: [CustomConfigModule,
+    TypeOrmModule.forRootAsync({
+      useClass: TypeOrmConfig,
+      inject : [TypeOrmConfig]
+    
+    })
+  ],
   controllers: [],
-  providers: [],
+  providers: [TypeOrmConfig],
 })
 export class AppModule {}

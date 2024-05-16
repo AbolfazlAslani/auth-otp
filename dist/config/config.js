@@ -11,9 +11,9 @@ const AppConfig = (0, config_1.registerAs)(ConfigKeys.App, () => ({
     port: 3000,
 }));
 const DbConfig = (0, config_1.registerAs)(ConfigKeys.Db, () => ({
-    port: 3000,
+    port: 5432,
     host: 'localhost',
-    username: 'root',
+    username: 'postgres',
     password: '151515',
     database: 'auth-otp'
 }));

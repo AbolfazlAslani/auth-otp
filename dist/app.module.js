@@ -9,14 +9,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const configs_module_1 = require("./modules/config/configs.module");
+const typeorm_1 = require("@nestjs/typeorm");
+const typeorm_config_1 = require("./config/typeorm.config");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [configs_module_1.CustomConfigModule],
+        imports: [configs_module_1.CustomConfigModule,
+            typeorm_1.TypeOrmModule.forRootAsync({
+                useClass: typeorm_config_1.TypeOrmConfig,
+                inject: [typeorm_config_1.TypeOrmConfig]
+            })
+        ],
         controllers: [],
-        providers: [],
+        providers: [typeorm_config_1.TypeOrmConfig],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map
