@@ -12,6 +12,7 @@ const configs_module_1 = require("./modules/config/configs.module");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_config_1 = require("./config/typeorm.config");
 const user_module_1 = require("./modules/user/user.module");
+const auth_module_1 = require("./modules/auth/auth.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -22,7 +23,8 @@ exports.AppModule = AppModule = __decorate([
                 useClass: typeorm_config_1.TypeOrmConfig,
                 inject: [typeorm_config_1.TypeOrmConfig]
             }),
-            user_module_1.UserModule
+            user_module_1.UserModule,
+            auth_module_1.AuthModule,
         ],
         controllers: [],
         providers: [typeorm_config_1.TypeOrmConfig],
