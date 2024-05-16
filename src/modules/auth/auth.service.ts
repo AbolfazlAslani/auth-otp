@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { UserEntity } from '../user/entities/user.entity';
 import { Code, Repository } from 'typeorm';
 import { otpEntity } from '../user/entities/otp.entity';
@@ -39,8 +39,15 @@ export class AuthService {
         const expiresIn = new Date(new Date().getTime() + 1000*60*2);
         const code = randomInt(10000,99999).toString();
         
+        
         let otp = await this.otpRepository.findOneBy({userId : user.id})
+
         if(otp){
+            if (otp.expires_in > new Date()){
+            
+                throw new BadRequestException("Otp No Expired!")
+            }
+
             otp.code =  code;
             otp.expires_in = expiresIn
         }else {

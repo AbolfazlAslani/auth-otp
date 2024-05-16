@@ -1,7 +1,10 @@
 import { AuthService } from './auth.service';
+import { SendOtpDto } from './dto/auth.dto';
 export declare class AuthController {
     private readonly authService;
     constructor(authService: AuthService);
-    sendOtp(): void;
+    sendOtp(otpDto: SendOtpDto): Promise<{
+        message: string;
+    }>;
     checkOtp(): void;
 }

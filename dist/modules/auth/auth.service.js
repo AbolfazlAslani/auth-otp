@@ -43,6 +43,9 @@ let AuthService = class AuthService {
         const code = (0, crypto_1.randomInt)(10000, 99999).toString();
         let otp = await this.otpRepository.findOneBy({ userId: user.id });
         if (otp) {
+            if (otp.expires_in > new Date()) {
+                throw new common_1.BadRequestException("Otp No Expired!");
+            }
             otp.code = code;
             otp.expires_in = expiresIn;
         }
