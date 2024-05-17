@@ -106,6 +106,24 @@ let AuthService = class AuthService {
             refreshToken
         };
     }
+    async validateAccessToken(token) {
+        try {
+            const payload = this.jwtService.verify(token, {
+                secret: this.configService.get("Jwt.accessTokenSecret")
+            });
+            if (typeof payload == "object" && payload?.id) {
+                const user = await this.userRepository.findOneBy({ id: payload.id });
+                if (!user) {
+                    throw new common_1.UnauthorizedException("Please login to your account");
+                }
+                return user;
+            }
+            throw new common_1.UnauthorizedException("Please login to your account");
+        }
+        catch (error) {
+            throw new common_1.UnauthorizedException("Please login to your account");
+        }
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([

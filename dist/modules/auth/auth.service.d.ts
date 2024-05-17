@@ -24,4 +24,5 @@ export declare class AuthService {
         accessToken: string;
         refreshToken: string;
     }>;
+    validateAccessToken(token: string): Promise<UserEntity>;
 }
