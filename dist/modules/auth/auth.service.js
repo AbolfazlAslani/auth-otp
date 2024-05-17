@@ -21,6 +21,7 @@ const typeorm_2 = require("@nestjs/typeorm");
 const crypto_1 = require("crypto");
 const jwt_1 = require("@nestjs/jwt");
 const config_1 = require("@nestjs/config");
+const bcrypt_1 = require("bcrypt");
 let AuthService = class AuthService {
     constructor(userRepository, otpRepository, jwtService, configService) {
         this.userRepository = userRepository;
@@ -55,6 +56,37 @@ let AuthService = class AuthService {
             refreshToken,
             message: "You Logged in Successfully!"
         };
+    }
+    async signUp(signupDto) {
+        const { confirm_password, email, first_name, last_name, mobile, password } = signupDto;
+        await this.checkEmail(email);
+        await this.checkMobile(mobile);
+        if (password !== confirm_password)
+            throw new common_1.BadRequestException("Password and confirm password do not match");
+        const salt = (0, bcrypt_1.genSaltSync)(10);
+        const hashedPassword = (0, bcrypt_1.hashSync)(password, salt);
+        const user = this.userRepository.create({
+            first_name,
+            last_name,
+            mobile,
+            password: hashedPassword,
+            email,
+            mobile_verify: false
+        });
+        await this.userRepository.save(user);
+        return {
+            message: "user signup successful!"
+        };
+    }
+    async checkEmail(email) {
+        const result = await this.userRepository.findOneBy({ email });
+        if (result)
+            throw new common_1.ConflictException("Email Already Exists!");
+    }
+    async checkMobile(mobile) {
+        const result = await this.userRepository.findOneBy({ mobile });
+        if (result)
+            throw new common_1.ConflictException("Mobile Already Exists!");
     }
     async sendOtp(otpDto) {
         const { mobile } = otpDto;

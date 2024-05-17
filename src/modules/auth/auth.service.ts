@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserEntity } from '../user/entities/user.entity';
 import { Code, Repository } from 'typeorm';
 import { otpEntity } from '../user/entities/otp.entity';
@@ -8,6 +8,8 @@ import { CheckOtpDto, SendOtpDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { TTokenPayload } from './types/payload';
+import { SignupDto } from './dto/basic.dto';
+import {genSaltSync,hashSync} from 'bcrypt'
 
 @Injectable()
 export class AuthService { 
@@ -55,7 +57,43 @@ export class AuthService {
         }    
 
     }
+    async signUp(signupDto : SignupDto){
+        const {confirm_password,email,first_name,last_name,mobile,password} = signupDto
+        
+        await this.checkEmail(email);
+        await this.checkMobile(mobile);
+        
+        if (password !== confirm_password) throw new BadRequestException("Password and confirm password do not match");
+        
+        const salt = genSaltSync(10);
+        const hashedPassword =  hashSync(password,salt);
+        
+        const user =  this.userRepository.create({
+            first_name,
+            last_name,
+            mobile,
+            password:hashedPassword,
+            email,
+            mobile_verify: false
+        })
+        await this.userRepository.save(user);
+        return { 
+            message: "user signup successful!"
+        }
+        
+        
+    }
+    async checkEmail (email :string){
+        const result = await this.userRepository.findOneBy({email})
+        if (result) throw new ConflictException("Email Already Exists!");
     
+    }
+    
+    async checkMobile (mobile :string){
+        const result = await this.userRepository.findOneBy({mobile})
+        if (result) throw new ConflictException("Mobile Already Exists!");
+    
+    }
     
     async sendOtp(otpDto : SendOtpDto){
         const {mobile} = otpDto;

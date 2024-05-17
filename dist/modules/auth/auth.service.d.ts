@@ -5,6 +5,7 @@ import { CheckOtpDto, SendOtpDto } from './dto/auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { TTokenPayload } from './types/payload';
+import { SignupDto } from './dto/basic.dto';
 export declare class AuthService {
     private userRepository;
     private otpRepository;
@@ -16,6 +17,11 @@ export declare class AuthService {
         refreshToken: string;
         message: string;
     }>;
+    signUp(signupDto: SignupDto): Promise<{
+        message: string;
+    }>;
+    checkEmail(email: string): Promise<void>;
+    checkMobile(mobile: string): Promise<void>;
     sendOtp(otpDto: SendOtpDto): Promise<{
         message: string;
     }>;
