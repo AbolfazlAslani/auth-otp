@@ -7,6 +7,8 @@ export declare class AuthController {
         message: string;
     }>;
     checkOtp(checkOtpDto: CheckOtpDto): Promise<{
+        accessToken: string;
+        refreshToken: string;
         message: string;
     }>;
 }

@@ -5,14 +5,19 @@ import { otpEntity } from '../user/entities/otp.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomInt } from 'crypto';
 import { CheckOtpDto, SendOtpDto } from './dto/auth.dto';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { TTokenPayload } from './types/payload';
 
 @Injectable()
 export class AuthService { 
     constructor(
       @InjectRepository(UserEntity)
       private userRepository : Repository<UserEntity> ,
-      
-      @InjectRepository(otpEntity) private otpRepository : Repository<otpEntity>   
+      @InjectRepository(otpEntity)
+      private otpRepository : Repository<otpEntity>,
+      private jwtService : JwtService,
+      private configService : ConfigService
 
     ){}
     
@@ -40,8 +45,12 @@ export class AuthService {
             )
         
         }
+
+        const {accessToken, refreshToken} = await this.createTokenForUser({id: user.id, mobile})
         
         return {
+            accessToken,
+            refreshToken,
             message:"You Logged in Successfully!"
         }    
 
@@ -94,6 +103,20 @@ export class AuthService {
         otp = await this.otpRepository.save(otp);
         user.otpId = otp.id;
         await this.userRepository.save(user);
+    }
+    async createTokenForUser(payload: TTokenPayload){
+        const accessToken = this.jwtService.sign(payload,{
+            secret : this.configService.get("Jwt.accessTokenSecret"),
+            expiresIn : "30d"
+        })
+        const refreshToken = this.jwtService.sign(payload,{
+            secret : this.configService.get("Jwt.refreshTokenSecret"),
+            expiresIn:"1y"
+        })
+        return { 
+            accessToken,
+            refreshToken
+        }
     }
 
 }

@@ -19,10 +19,14 @@ const typeorm_1 = require("typeorm");
 const otp_entity_1 = require("../user/entities/otp.entity");
 const typeorm_2 = require("@nestjs/typeorm");
 const crypto_1 = require("crypto");
+const jwt_1 = require("@nestjs/jwt");
+const config_1 = require("@nestjs/config");
 let AuthService = class AuthService {
-    constructor(userRepository, otpRepository) {
+    constructor(userRepository, otpRepository, jwtService, configService) {
         this.userRepository = userRepository;
         this.otpRepository = otpRepository;
+        this.jwtService = jwtService;
+        this.configService = configService;
     }
     async checkOtp(otpDto) {
         const { mobile, code } = otpDto;
@@ -45,7 +49,10 @@ let AuthService = class AuthService {
                 mobile_verify: true
             });
         }
+        const { accessToken, refreshToken } = await this.createTokenForUser({ id: user.id, mobile });
         return {
+            accessToken,
+            refreshToken,
             message: "You Logged in Successfully!"
         };
     }
@@ -85,6 +92,20 @@ let AuthService = class AuthService {
         user.otpId = otp.id;
         await this.userRepository.save(user);
     }
+    async createTokenForUser(payload) {
+        const accessToken = this.jwtService.sign(payload, {
+            secret: this.configService.get("Jwt.accessTokenSecret"),
+            expiresIn: "30d"
+        });
+        const refreshToken = this.jwtService.sign(payload, {
+            secret: this.configService.get("Jwt.refreshTokenSecret"),
+            expiresIn: "1y"
+        });
+        return {
+            accessToken,
+            refreshToken
+        };
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
@@ -92,6 +113,8 @@ exports.AuthService = AuthService = __decorate([
     __param(0, (0, typeorm_2.InjectRepository)(user_entity_1.UserEntity)),
     __param(1, (0, typeorm_2.InjectRepository)(otp_entity_1.otpEntity)),
     __metadata("design:paramtypes", [typeorm_1.Repository,
-        typeorm_1.Repository])
+        typeorm_1.Repository,
+        jwt_1.JwtService,
+        config_1.ConfigService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map
