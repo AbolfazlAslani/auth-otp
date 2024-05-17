@@ -118,5 +118,25 @@ export class AuthService {
             refreshToken
         }
     }
+    async validateAccessToken(token:string){
+        try {
+            const payload = this.jwtService.verify<TTokenPayload>(token,{
+                secret : this.configService.get("Jwt.accessTokenSecret")
+            })
+            if(typeof payload =="object" && payload?.id ){
+                const user = await this.userRepository.findOneBy({id:payload.id})
+                if(!user) {
+                    throw new UnauthorizedException("Please login to your account")
+                }
+                return user;
+            }
+            throw new UnauthorizedException("Please login to your account")
+
+        } catch (error) {
+            throw new UnauthorizedException("Please login to your account")
+
+        }
+    
+    }
 
 }
